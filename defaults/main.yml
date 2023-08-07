@@ -16,7 +16,7 @@ headscale_ui_dir_mode: '0751'
 
 headscale_htpasswd_path: /etc/nginx/.htpasswd
 headscale_htpasswd_user: galaxy
-headscale_htpasswd_password: GuardianofGalaxy
+headscale_htpasswd_password: from_the_vault
 headscale_htpasswd_owner: nginx
 headscale_htpasswd_group: nginx
 headscale_htpasswd_mode: '0400'
@@ -38,7 +38,7 @@ headscale_ui_color: "cyan lighten-3"
 headscale_ui_server: "https://headscale.flyingrabb.it"
 headscale_ui_domain_name: "http://127.0.0.1:5000"
 headscale_ui_script_name: "/admin"
-headscale_ui_key: "PdmwfPaXLp1sORnppzg2jPvvGBbp63ydvjXUjj1FL3c="
+headscale_ui_key: "from_the_vault"
 headscale_ui_auth_type: ""
 headscale_ui_log_level: "DEBUG"
 headscale_ui_data_volume: /opt/headscale-ui
