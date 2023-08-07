@@ -1,0 +1,90 @@
+---
+# tasks file for headscale_role
+
+- name: Create headscale config dir
+  ansible.builtin.file:
+    path: "{{ headscale_etc_dir_path }}"
+    state: directory
+    owner: "{{ headscale_owner }}"
+    group: "{{ headscale_group }}"
+    mode: "{{ headscale_dir_mode }}"
+
+- name: Create headscale WebUI data dir
+  ansible.builtin.file:
+    path: "{{ headscale_ui_data_dir }}"
+    state: directory
+    owner: "{{ headscale_ui_owner }}"
+    group: "{{ headscale_ui_group }}"
+    mode: "{{ headscale_ui_dir_mode }}"
+
+- name: Install passlib package
+  ansible.builtin.pip:
+    name: passlib
+    state: present
+
+- name: Add a user to a password file suitable for use by libpam-pwdfile
+  community.general.htpasswd:
+    path: "{{ headscale_htpasswd_path }}"
+    name: "{{ headscale_htpasswd_user }}"
+    password: "{{ headscale_htpasswd_password }}"
+    crypt_scheme: md5_crypt
+    owner: "{{ headscale_htpasswd_owner }}"
+    group: "{{ headscale_htpasswd_group }}"
+    mode: "{{ headscale_htpasswd_mode }}"
+
+- name: Touch db.sqlite
+  ansible.builtin.file:
+    path: "{{ headscale_etc_dir_path }}/db.sqlite"
+    state: touch
+    mode: "{{ headscale_db_mode }}"
+
+- name: Set headscale config.yaml.
+  ansible.builtin.copy:
+    content: "{{ headscale_config | to_nice_yaml(sort_keys=False) }}"
+    dest: "{{ headscale_etc_dir_path }}/config.yaml"
+    owner: "{{ headscale_user_name }}"
+    group: "{{ headscale_user_name }}"
+    mode: "{{ headscale_config_mode }}"
+  notify:
+    - Restart headscale container
+
+- name: Set headscale acl.yaml.
+  ansible.builtin.copy:
+    content: "{{ headscale_acl | to_nice_yaml(sort_keys=False) }}"
+    dest: "{{ headscale_etc_dir_path }}/acl.yaml"
+    owner: "{{ headscale_user_name }}"
+    group: "{{ headscale_user_name }}"
+    mode: "{{ headscale_acl_mode }}"
+
+- name: Run headscale docker container
+  community.docker.docker_container:
+    name: "{{ headscale_container_name }}"
+    image: "{{ headscale_image }}"
+    state: started
+    detach: true
+    restart_policy: unless-stopped
+    volumes: "{{ headscale_container_volumes }}"
+    ports: "{{ headscale_container_ports }}"
+    pull: true
+    recreate: true
+    command: headscale serve
+
+- name: Run headscale-ui docker container
+  community.docker.docker_container:
+    image: "{{ headscale_ui_image }}"
+    name: "{{ headscale_ui_container_name }}"
+    env:
+      TZ: "{{ headscale_ui_timezone }}"
+      COLOR: "{{ headscale_ui_color }}"
+      HS_SERVER: "{{ headscale_ui_server }}"
+      DOMAIN_NAME: "{{ headscale_ui_domain_name }}"
+      SCRIPT_NAME: "{{ headscale_ui_script_name }}"
+      KEY: "{{ headscale_ui_key }}"
+      AUTH_TYPE: "{{ headscale_ui_auth_type }}"
+      LOG_LEVEL: "{{ headscale_ui_log_level }}"
+    volumes: "{{ headscale_ui_container_volumes }}"
+    ports: "{{ headscale_ui_container_ports }}"
+    state: started
+    detach: true
+    recreate: true
+  when: headscale_ui_dashboard_enable

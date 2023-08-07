@@ -1,0 +1,54 @@
+---
+# defaults file for headscale_role
+headscale_config_mode: ""
+headscale_acl: ""
+headscale_etc_dir_path: /etc/headscale
+headscale_user_name: root
+
+headscale_owner: root
+headscale_group: root
+headscale_dir_mode: '0755'
+
+headscale_ui_data_dir: /opt/headscale-ui
+headscale_ui_owner: 1000
+headscale_ui_group: 1000
+headscale_ui_dir_mode: '0751'
+
+headscale_htpasswd_path: /etc/nginx/.htpasswd
+headscale_htpasswd_user: galaxy
+headscale_htpasswd_password: GuardianofGalaxy
+headscale_htpasswd_owner: nginx
+headscale_htpasswd_group: nginx
+headscale_htpasswd_mode: '0400'
+
+headscale_db_mode: '0770'
+
+headscale_config_mode: '0644'
+headscale_acl_mode: '0660'
+
+headscale_image: headscale/headscale
+headscale_ui_dashboard_enable: true
+
+# Container related variables
+headscale_container_name: headscale
+headscale_ui_container_name: headscale-webui
+headscale_ui_image: ghcr.io/ifargle/headscale-webui:latest
+headscale_ui_timezone: EUROPE/BERLIN
+headscale_ui_color: "cyan lighten-3"
+headscale_ui_server: "https://headscale.flyingrabb.it"
+headscale_ui_domain_name: "http://127.0.0.1:5000"
+headscale_ui_script_name: "/admin"
+headscale_ui_key: "PdmwfPaXLp1sORnppzg2jPvvGBbp63ydvjXUjj1FL3c="
+headscale_ui_auth_type: ""
+headscale_ui_log_level: "DEBUG"
+headscale_ui_data_volume: /opt/headscale-ui
+headscale_container_volumes:
+  - "{{ headscale_etc_dir_path }}:/etc/headscale"
+headscale_ui_container_volumes:
+  - "{{ headscale_ui_data_volume }}:/data"
+  - "{{ headscale_etc_dir_path }}:/etc/headscale/:ro"
+headscale_container_ports:
+  - "127.0.0.1:8080:8080"
+  - "127.0.0.1:9090:9090"
+headscale_ui_container_ports:
+  - "127.0.0.1:5000:5000"
